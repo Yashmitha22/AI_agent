@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatMessagePromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
+from langchain.agents import create_tool_calling_agent
 
 load_dotenv()
 
@@ -31,5 +32,15 @@ prompt = ChatMessagePromptTemplate.from_messages(
         ("placeholder","{agent_scratchpad}"),
 
     ]
+).partial(format_instructions=parser.get_format_instructions())
+
+agent = create_tool_calling_agent (
+    llm=llm,
+    prompt=prompt,
+    tools=[]
+
 )
 
+agent_executor = AgentExecutor(agent=agent,tools=[],verbose=True)
+raw_response = agent_executor.invoke({"queri":"What is the capital of France?"})
+print(raw_response)
